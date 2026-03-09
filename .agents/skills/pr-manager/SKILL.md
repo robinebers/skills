@@ -49,6 +49,7 @@ Run this workflow when the user asks to create or open a PR.
      - `## Test plan` as a checklist
    - Keep the TL;DR to no more than 2 sentences.
 7. Push and create the PR.
+   - Immediately before the push, record a UTC timestamp such as `push_started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")`.
    - Push with `GIT_EDITOR=true git push -u origin HEAD` when needed.
    - Create the PR with `gh pr create` and a heredoc body.
    - Always return the PR URL.
@@ -59,6 +60,8 @@ After creating a PR, continue automatically without asking the user.
 
 - Run the wait, polling, and follow-up comment pull in the primary thread.
 - Do not move `sleep`, check polling, or the follow-up comment workflow into a background terminal, detached process, or subagent.
+- After the push completes, wait `sleep 30` in the primary thread before fetching follow-up review comments so automated reviewers have a chance to post.
+- When this workflow is running immediately after a push, only report comments and reviews created after `push_started_at`.
 
 1. Wait 5 minutes for CI to start.
    - Use `sleep 300` directly in the primary thread.
@@ -82,6 +85,7 @@ Run this workflow when the user asks to pull comments, check for new comments, o
    - Use an explicit PR URL or PR number when the user provides one.
    - Otherwise infer PR context from current branch tracking or recent `gh pr` activity.
    - If the PR still cannot be determined, ask: `Which PR? (URL, number, or "current" for this branch)`
+   - If this workflow is running immediately after a push and `push_started_at` is known, treat that timestamp as the lower bound for "new comments".
 2. Fetch all comment sources with `gh`.
 
 ```bash
@@ -90,15 +94,18 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
 gh api repos/{owner}/{repo}/issues/{number}/comments --paginate
 ```
 
-3. Process and organize the fetched data.
+3. Filter to the requested time window.
+   - When checking for new comments after a push, keep only reviews, review comments, and issue comments with `createdAt`, `submittedAt`, or `created_at` later than `push_started_at`.
+   - When no timestamp filter is active, keep the full result set.
+4. Process and organize the fetched data.
    - Group comments by reviewer login.
    - Deduplicate duplicate or near-duplicate comments.
    - Collapse comment threads into a single item with enough context to understand the issue.
-4. Categorize severity from the reviewer tone and content.
+5. Categorize severity from the reviewer tone and content.
    - `Critical`: required changes, bugs, security problems, or anything that prevents merge.
    - `Should Fix`: recommended changes, style issues, cleaner approaches, or repeated requests.
    - `Suggestions`: optional ideas, nits, questions, or minor improvements.
-5. Explain each comment for non-technical readers.
+6. Explain each comment for non-technical readers.
    - Start with a single plain-language summary paragraph that combines the reviewer request and the practical meaning.
    - `Why it matters`: explain the impact in simple everyday language for a non-technical person and avoid jargon.
    - `How to fix`: explain the likely fix in simple everyday language when the fix is obvious.
@@ -108,13 +115,18 @@ gh api repos/{owner}/{repo}/issues/{number}/comments --paginate
 
 Number comments sequentially as `C1`, `C2`, `C3`, and so on across all categories so the user can refer to them easily.
 
+Limit the response to exactly:
+- One title line in the form `PR #123 - {title}`
+- `### Critical`
+- `### Should Fix`
+- `### Suggestions`
+
+Do not include reviewer counts, comment counts, check results, quick-reference tables, summaries, metadata headers, or any extra sections before or after those categories.
+
 ```markdown
-## PR #123: {title}
-By @{author} | {n} reviewers | {total} comments
+PR #123 - {title}
 
----
-
-### Critical ({count})
+### Critical
 
 🔴 **#C1** · @reviewer1 · `src/file.tsx:42`
 {single plain-language summary of the reviewer comment and what it means in practice}
@@ -124,34 +136,20 @@ By @{author} | {n} reviewers | {total} comments
 
 ---
 
-### Should Fix ({count})
+### Should Fix
 
 🟠 **#C2** · @reviewer2 · `src/api.ts:88`
 ...
 
-### Suggestions ({count})
+### Suggestions
 
 🟡 **#C3** · @reviewer3 · `src/index.ts:5`
 ...
-
----
-
-## Quick Reference
-| # | File | Reviewer | Severity |
-|---|------|----------|----------|
-| C1 | src/file.tsx:42 | @reviewer1 | 🔴 Critical |
-| C2 | src/api.ts:88 | @reviewer2 | 🟠 Should Fix |
-| C3 | src/index.ts:5 | @reviewer3 | 🟡 Suggestions |
-
-## Summary
-- {critical} critical issues to resolve
-- {should_fix} recommended changes
-- {suggestions} optional improvements
-- Top concerns: {1-2 sentence plain-language summary of the main themes}
 ```
 
 ## Edge Cases
 
-- If the PR has no review comments, say `No review comments yet`.
+- If the PR has no review comments in the active time window, say `No new review comments yet`.
+- If the user explicitly asks for all comments instead of new ones, ignore `push_started_at` and summarize the full discussion.
 - If comment threads are very long, summarize the thread into one item and keep only the essential context.
 - If the GitHub API fails, show the error and suggest checking `gh auth status`.
