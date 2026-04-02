@@ -31,8 +31,10 @@ C) Just summarize, I'll decide
 
 After every push, run this cycle automatically. Do not ask the user whether to continue.
 
-1. **Poll checks** — run `gh pr checks` until all checks have completed or 20 minutes have passed. Show brief progress updates like `3/5 checks done, waiting...`. Poll every 30 seconds.
-2. **Fetch comments** — use `gh` to pull PR reviews, inline comments, and issue comments.
+1. **Poll checks** — run `gh pr checks` until all checks have completed.
+2. **CRITICAL:** DO NOT STOP, EVEN IF PENDING. You are explicitly waiting for ALL AI code reviewers to finish their reviews.
+3. **Update user:**  Show brief progress updates like `3/5 checks done, waiting...`. Poll every 30 seconds.
+4. **Fetch comments** — use `gh` to pull PR reviews, inline comments, and issue comments.
 
 ```bash
 gh pr view <PR> --json reviews,comments,url,title,author
