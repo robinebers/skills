@@ -1,6 +1,0 @@
-interface:
-  display_name: "PR Manager"
-  short_description: "Create PRs and pull review comments"
-  default_prompt: "Use $pr-manager to create a GitHub pull request or pull the latest PR review comments."
-policy:
-  allow_implicit_invocation: true

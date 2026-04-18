@@ -1,6 +1,0 @@
-interface:
-  display_name: "macOS Computer Use"
-  short_description: "Window capture and input control"
-  default_prompt: "Use $macos-computer-use to control a macOS app through window screenshots and synthetic input events."
-policy:
-  allow_implicit_invocation: true
