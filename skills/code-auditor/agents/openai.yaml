@@ -1,6 +1,0 @@
-interface:
-  display_name: "Code Auditor"
-  short_description: "Audit codebases for dead code and duplication"
-  default_prompt: "Use $code-auditor to audit this codebase for duplication, unused code, and dependency bloat."
-policy:
-  allow_implicit_invocation: true
