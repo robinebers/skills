@@ -12,8 +12,10 @@ A small public repo of reusable agent skills, packaged for installation with [`n
   - **The Duplicate Audit** - find values and logic duplicated across the codebase, propose a single source of truth.
   - **The Fail-Fast Audit** - find places where errors are silently swallowed, propose loud failures.
   - **The Retry Audit** - find spots that could fire twice and cause real damage (duplicate emails, double charges), propose idempotency fixes.
-- `conductor-json` - Generate `conductor.json` files for Conductor workspaces.
-- `shepherd` - Shepherd a GitHub pull request all the way to done by polling status, addressing automatic reviewer feedback (Cubic, Bugbot, etc.), and verifying the merge cycle is truly clean.
+
+- `setup-process` - Generate setup scripts/configs for AI agent worktrees and isolated environments across Cursor, Codex, and Conductor so agents start with the same dependencies, env files, and tool configs as the main repo.
+
+- `shepherd` - Shepherd a GitHub pull request all the way to done by polling status, addressing automatic reviewer feedback (Cubic, Bugbot etc.), and verifying the merge cycle is truly clean.
 
 ## Install
 
@@ -27,7 +29,7 @@ Install a single skill:
 
 ```bash
 npx skills add robinebers/skills --skill code-upgrade
-npx skills add robinebers/skills --skill conductor-json
+npx skills add robinebers/skills --skill setup-process
 npx skills add robinebers/skills --skill shepherd
 ```
 
