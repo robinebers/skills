@@ -9,7 +9,7 @@ AI coding tools that wrap engineering-principles into skills for normal people.
 
 ## The tools
 
-- **[The Master Audit](master-audit.md):** Run architecture + duplicate + fail-fast + bloat in parallel, return one short executive plan. Costs more, says more.
+- **[The Master Audit](master-audit.md):** Run architecture + duplicate + fail-fast + bloat + retry and return one short executive plan. Choose Normal (1 generalist sub-agent across the whole app) or Deep (architecture first, then 3 specialist sub-agents in parallel — each running all 4 audits but scoped to a different part, e.g. frontend / backend / other). Costs more, says more.
 - **[The Architecture Audit](architecture-audit.md):** Explain the app, then let user grill it.
 - **[The Plan Checklist](plan-checklist.md):** Use before approval a plan to verify and simplify it.
 - **[The Fail-Fast Audit](fail-fast-audit.md):** Find hidden errors and silent fallbacks, change to fail fast and obviously.
@@ -26,5 +26,4 @@ AI coding tools that wrap engineering-principles into skills for normal people.
 - Run multiple async subagents aggressively to increase hits.
 
 ## Future Skill Ideas
-- Idempotency ("The Retry Audit")
-- Plan simplification with KISS/YAGNI ("The Plan Checklist")
+- (none yet)

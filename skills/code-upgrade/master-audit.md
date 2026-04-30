@@ -1,48 +1,76 @@
 # The Master Audit
 
-Map the app, then run 3 master agents in parallel - each one running the full audit suite - and combine their findings into one short, high-confidence plan.
+Map the app, then run the audit suite and combine the findings into one short, high-confidence plan.
+
+## Pick a mode
+
+Before starting, ask the user which mode they want:
+
+- **Normal:** Runs a full audit across the whole codebase. Takes a bit of time and isn't cheap, but it's good enough for most cases.
+- **Deep:** Runs 3x targeted master audits in parallel - one per part of the app (e.g. frontend, backend, etc). Significantly slower and over 3x the cost. Occasionally finds things Normal misses.
 
 ## Before you start
 
-This is expensive. It runs 9 audits in parallel (3 agents × 3 audits each), plus the architecture audit. It takes a while and burns a lot of tokens.
+Once they've picked a mode, confirm cost before kicking off:
 
-Always confirm first:
+> "Master audits use significant cost or subscription usage and take some time. Are you sure you'd like to run it now? Answer **YES** to continue."
 
-> "The Master Audit runs the architecture audit once, then 3 master agents in parallel - each running the duplicate, fail-fast, and bloat audits. That's 10 audits total. It takes a while and can burn significant tokens (potentially $$$ depending on the model). Are you sure?"
-
-Look for an explitcit YES, even if they asked for a Master audit explicitly.
+Look for an explicit YES, even if they asked for a Master audit explicitly.
 
 ## Run
 
-### 1. Architecture audit
+### 1. Architecture audit (synchronous, both modes)
 
-Run [The Architecture Audit](architecture-audit.md) once. This grounds every later finding in real flows.
+Run [The Architecture Audit](architecture-audit.md) once and wait for it to finish. This is required for the next steps.
 
-### 2. Spawn 3 master agents in parallel
+Capture the key outputs (entry points, main flows, hot files, risky areas) so they can be passed as shared context to the next step.
 
-Spawn 3 master audit subagents at the same time. Each one independently runs ALL three audits in a synchronous subagent. NO SUBAGENT RECURSION!
+### 2. Spawn sub-agent(s)
+
+**Normal mode:** Spawn 1 master audit sub-agent. It runs ALL four audits sequentially across the whole app, in a synchronous sub-agent. NO SUBAGENT RECURSION!
 
 Run in order:
+
 - [The Duplicate Audit](duplicate-audit.md)
 - [The Fail-Fast Audit](fail-fast-audit.md)
 - [The Bloat Audit](bloat-audit.md)
+- [The Retry Audit](retry-audit.md)
 
-Each of those 3 master agents researches aggressively while running each audit. Don't re-explain it to them.
+**Deep mode:** Once the architecture audit is done, pick 3 parts of the app that fit this codebase, based on what the architecture audit revealed. Common splits:
 
-### 3. Combine across agents
+- `frontend` / `backend` / `other`
+- `client` / `server` / `other`
+- `app` / `infra` / `other`
+- `web` / `api` / `other`
 
-Wait for all 3 master agents to return. Merge their findings.
+Pick the three largest or most mission-critical parts and one other to cover everything else. Provide the agents with **light direction** and let them explore freely, in read-only mode. Always include `other` as the catch-all so nothing falls through.
+
+Then dispatch 3 specialist sub-agents in parallel - one per part. Each specialist runs ALL four audits, scoped to its part. NO SUBAGENT RECURSION!
+
+- Specialist A → its part → [Duplicate](duplicate-audit.md), [Fail-Fast](fail-fast-audit.md), [Bloat](bloat-audit.md), [Retry](retry-audit.md)
+- Specialist B → its part → [Duplicate](duplicate-audit.md), [Fail-Fast](fail-fast-audit.md), [Bloat](bloat-audit.md), [Retry](retry-audit.md)
+- Specialist C → its part → [Duplicate](duplicate-audit.md), [Fail-Fast](fail-fast-audit.md), [Bloat](bloat-audit.md), [Retry](retry-audit.md)
+
+Pass each specialist:
+- The architecture audit output (entry points, main flows, hot files, risky areas), so they don't re-map the app entirely.
+- Their assigned part and a clear scope (paths/dirs that belong to it). The catch-all specialist owns everything not claimed by the other parts.
+
+In both modes, sub-agents research aggressively. Don't re-explain the audits to them.
+
+### 3. Combine findings
+
+Wait for all sub-agents to return. Merge their findings.
 
 If the same issue shows up in two different audits (e.g. a duplicate that's also bloat), pick the strongest framing and deduplicate.
 
+In Deep mode, also watch for duplicates that span multiple parts (e.g. the same constant defined in frontend AND backend) - those are usually high-impact.
+
 Score each finding's **impact (1-10)** based on real-world consequence:
 
-- **1-3** → minor cleanup, small win
-- **4-6** → meaningful improvement, worth doing
-- **7-9** → major impact (preventing customer-facing bugs, hours saved, big code reduction)
 - **10** → critical (silent revenue loss, broken core flow, security risk)
-
-If only 1 of the 3 master agents flagged something, weigh it more carefully. Low impact + low agreement = drop.
+- **7-9** → major impact (preventing customer-facing bugs, hours saved, big code reduction)
+- **4-6** → meaningful improvement, worth doing
+- **1-3** → minor cleanup, small win
 
 Aim for a minimal, surgical plan: the biggest impact with the smallest, safest code change. Sort findings by impact, highest first.
 
@@ -69,14 +97,16 @@ For each to-do item, in the same order:
 
 - **What it is:** [plain language, 1-2 sentences]
 - **Why it matters:** [in human terms, what would actually go wrong or improve]
-- **Impact:** [1-10] (and how many of the 3 master agents flagged it, e.g. "8/10, flagged by 3/3")
+- **Impact:** [1-10]
 - **Files involved:** [paths as references at the end]
 ```
 
 ## Rules
 
-- Always confirm cost/time first. Never just start.
-- 1 architecture audit, then 3 master agents in parallel, each running all 3 audits. 9 audits total.
+- Always ask Normal vs Deep, then confirm cost/time before running. Require an explicit YES.
+- Architecture audit is always synchronous and goes first. Pass its output to the next stage.
+- Normal = 1 generalist sub-agent runs all 4 audits sequentially across the whole app.
+- Deep = 3 specialist sub-agents in parallel, each running all 4 audits but scoped to a different part (e.g. frontend / backend / other). Always include `other` as a catch-all.
 - Score each finding by impact 1-10 based on real-world consequence. Sort highest first.
 - Keep the summary and to-do brutally short. Detail goes at the bottom only.
 - Minimal, surgical fixes.

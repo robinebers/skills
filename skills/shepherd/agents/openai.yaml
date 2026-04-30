@@ -1,6 +1,6 @@
 interface:
   display_name: "Shepherd"
   short_description: "Drive a PR to done through Cubic and Bugbot review"
-  default_prompt: "Use $shepherd to shepherd a GitHub pull request to done after Cubic and Bugbot review."
+  default_prompt: "Use $shepherd to shepherd a GitHub pull request to merge-ready after Cubic and Bugbot review. Does not merge without explicit approval."
 policy:
   allow_implicit_invocation: true

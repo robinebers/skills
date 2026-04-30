@@ -84,3 +84,4 @@ Each fix as its own diff. Ask before applying.
 - For outside services with built-in idempotency keys (Stripe, Resend, Inngest), use them.
 - Don't auto-fix.
 - If a webhook has no signature verification, mention it as a related risk but flag it as out of scope (that's a security issue, not an idempotency one).
+
