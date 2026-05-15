@@ -17,6 +17,8 @@ A small public repo of reusable agent skills, packaged for installation with [`n
 
 - `shepherd` - Shepherd a GitHub pull request to merge-ready by polling status, addressing automatic reviewer feedback (Cubic, Bugbot etc.), and verifying the review cycle is truly clean. Stops at merge-ready and never merges without explicit human approval.
 
+- `hotseat` - Put yourself in the hot seat and let the agent interrogate your plan one branch at a time until every decision is resolved. The agent only asks questions that genuinely need your input — anything answerable by reading the codebase or using web/docs tools (Exa, Ref/Context7, GitHits) gets researched first. Inspired by [Matt Pocock](https://github.com/mattpocock)'s [`grill-me`](https://github.com/mattpocock/skills/blob/main/grill-me/SKILL.md).
+
 ## Install
 
 Install everything from GitHub:
@@ -31,6 +33,7 @@ Install a single skill:
 npx skills add robinebers/skills --skill code-upgrade
 npx skills add robinebers/skills --skill setup-process
 npx skills add robinebers/skills --skill shepherd
+npx skills add robinebers/skills --skill hotseat
 ```
 
 List what the package exposes:
