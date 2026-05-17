@@ -1,13 +1,13 @@
 ---
 name: setup-process
-description: Generate setup scripts/configs for AI agent worktrees and isolated environments across Cursor, Codex, and Conductor. Use when wiring up a project so AI agents start with the same dependencies, env files, and tool configs as the main repo.
+description: Generate setup scripts/configs for AI agent worktrees and isolated environments across Cursor, Codex, Conductor, and Claude Code. Use when wiring up a project so AI agents start with the same dependencies, env files, and tool configs as the main repo.
 ---
 
 # The Setup Process
 
 Generate the right config so AI agents start in their isolated worktrees / environments with the same setup as the main repo: dependencies installed, env files in place, tool configs copied over.
 
-1. Unless the context already provides an answer, explicitly ask the user which tool the setup is for: Cursor, Codex, or Conductor.
+1. Unless the context already provides an answer, explicitly ask the user which tool the setup is for: Cursor, Codex, Conductor, or Claude Code.
 
 2. Map out the project (web, native, Rust, Swift, etc.) and make judgement calls on the right setup/install, run/actions, and teardown/archive commands.
 
@@ -18,16 +18,19 @@ Generate the right config so AI agents start in their isolated worktrees / envir
 - **Cursor:** Local parallel-agent worktrees in `.cursor/worktrees.json`.
 - **Codex:** Setup script + actions in `.codex/environments/environment.toml`.
 - **Conductor:** Workspace setup in `conductor.json`.
+- **Claude Code:** `.worktreeinclude` at the repo root (gitignored files to copy into each worktree) + `.claude/settings.json` `SessionStart` hook for install.
 
 ## The shared pattern
 
-Across all of them, the setup script usually does the same 3 things:
+Across Cursor, Codex, and Conductor, the setup script usually does the same 3 things:
 
 1. **Install dependencies** - run appropriate commands by project type, like Bun, Tauri, make, cargo, swift, etc. Read the README, `package.json`, `Makefile`, `Cargo.toml`, or similar to figure out what's right.
 2. **Copy AI-tool config dirs** - `.agents`, `.claude`, `.codex`, `.cursor` from the source repo into the new environment.
 3. **Copy env files** - `.env`, `.env.local`, `.env.development`, etc.
 
 CRITICAL: the setup script always lives project-scoped, not global.
+
+Claude Code is the exception: it auto-copies tracked files into each worktree and uses a declarative include list (`.worktreeinclude`) for gitignored files plus a `SessionStart` hook for install — no imperative setup script. See its section below.
 
 ### Reusable copy snippet
 
@@ -126,11 +129,55 @@ Template:
 }
 ```
 
+### Claude Code
+
+Claude Code's worktree manager auto-copies all tracked files (including `.claude/`) into each new worktree, so no rsync of config dirs is needed. Only gitignored files need to be listed explicitly, and install runs through a session hook.
+
+Three artifacts, all at the repo root:
+
+**`.worktreeinclude`** — one line per gitignored file to copy into every new worktree:
+
+```
+{ENV_FILE}
+```
+
+**`.claude/settings.json`** — runs `{INSTALL_CMD}` on every new Claude session and every fresh worktree. `matcher: "startup"` skips `--resume` so it doesn't fire on session resumes:
+
+```json
+{
+    "hooks": {
+        "SessionStart": [
+            {
+                "matcher": "startup",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "{INSTALL_CMD}",
+                        "timeout": 120
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+`timeout` is in seconds. Bump it for projects with cold-build steps (Tauri, Rust, Swift cold builds can run several minutes).
+
+**`.gitignore`** — under a `# claude code runtime` block so the runtime worktree directory and lock file aren't committed:
+
+```
+# claude code runtime
+/.claude/scheduled_tasks.lock
+/.claude/worktrees/
+```
+
 ## Environment variables by platform
 
 - **Cursor:** `$ROOT_WORKTREE_PATH` / (cwd is the new worktree, no separate destination var)
 - **Codex:** `$CODEX_SOURCE_TREE_PATH` / `$CODEX_WORKTREE_PATH`
 - **Conductor:** `$CONDUCTOR_ROOT_PATH` / `$CONDUCTOR_WORKSPACE_PATH`
+- **Claude Code:** none — declarative (`.worktreeinclude`) + session hook; no source/dest vars.
 
 Vendors rename these. Always check the platform's docs before writing them.
 
