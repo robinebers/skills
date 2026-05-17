@@ -13,7 +13,7 @@ A small public repo of reusable agent skills, packaged for installation with [`n
   - **The Fail-Fast Audit** - find places where errors are silently swallowed, propose loud failures.
   - **The Retry Audit** - find spots that could fire twice and cause real damage (duplicate emails, double charges), propose idempotency fixes.
 
-- `setup-process` - Set up new AI agent workspaces (Git worktrees) so they start ready-to-go — same tools, same settings, same access as your main setup. No blank slate, no manual fiddling. Works with Cursor, Codex, Conductor, and Claude Code.
+- `worktree-setup` - Set up new AI agent workspaces (Git worktrees) so they start ready-to-go — same tools, same settings, same access as your main setup. No blank slate, no manual fiddling. Works with Cursor, Codex, Conductor, and Claude Code.
 
 - `shepherd` - Shepherd a GitHub pull request to merge-ready by polling status, addressing automatic reviewer feedback (Cubic, Bugbot etc.), and verifying the review cycle is truly clean. Stops at merge-ready and never merges without explicit human approval.
 
@@ -31,7 +31,7 @@ Install a single skill:
 
 ```bash
 npx skills add robinebers/skills --skill code-upgrade
-npx skills add robinebers/skills --skill setup-process
+npx skills add robinebers/skills --skill worktree-setup
 npx skills add robinebers/skills --skill shepherd
 npx skills add robinebers/skills --skill hotseat
 ```

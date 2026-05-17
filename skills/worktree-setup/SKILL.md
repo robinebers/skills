@@ -1,8 +1,6 @@
 ---
-name: setup-process
+name: worktree-setup
 description: Generate setup scripts/configs for AI agent worktrees and isolated environments across Cursor, Codex, Conductor, and Claude Code. Use when wiring up a project so AI agents start with the same dependencies, env files, and tool configs as the main repo.
-metadata:
-  internal: true
 ---
 
 # Worktree Setup
