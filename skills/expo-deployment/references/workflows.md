@@ -134,17 +134,19 @@ on:
 
 jobs:
   check-changes:
-    type: run
-    params:
-      command: |
-        if git diff --name-only HEAD~1 | grep -q "^src/"; then
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
+    outputs:
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+    steps:
+      - id: detect
+        run: |
+          if git diff --name-only HEAD~1 | grep -q "^src/"; then
+            set-output has_changes "true"
+          fi
 
   build:
     type: build
     needs: [check-changes]
-    if: needs.check-changes.outputs.has_changes == 'true'
+    if: ${{ needs.check-changes.outputs.has_changes == 'true' }}
     params:
       platform: all
       profile: production

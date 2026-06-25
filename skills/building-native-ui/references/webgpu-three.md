@@ -214,6 +214,7 @@ export const FiberCanvas = ({
       if (canvas != null) {
         unmountComponentAtNode(canvas!);
       }
+      root.current = null; // cleared so the next setup recreates the root
     };
   }, [scene, camera]); // (re)configure the root when the scene or camera changes
 

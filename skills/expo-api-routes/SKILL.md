@@ -336,8 +336,14 @@ export async function requireAuth(request: Request) {
 import { requireAuth } from "../../utils/auth";
 
 export async function GET(request: Request) {
-  const { userId } = await requireAuth(request);
-  return Response.json({ userId });
+  try {
+    const { userId } = await requireAuth(request);
+    return Response.json({ userId });
+  } catch (e) {
+    // Expo Router API handlers must *return* a Response; a thrown one becomes a 500.
+    if (e instanceof Response) return e;
+    throw e;
+  }
 }
 ```
 

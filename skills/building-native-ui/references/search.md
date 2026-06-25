@@ -89,6 +89,8 @@ export function useSearch(options: any = {}) {
         },
       },
     });
+    // Keyed on navigation so it sets up once; add specific option values to the
+    // deps if you need changing options (e.g. placeholder) to re-apply.
   }, [navigation]);
 
   return search;
