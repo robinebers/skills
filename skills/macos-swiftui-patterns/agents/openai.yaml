@@ -1,4 +1,0 @@
-interface:
-  display_name: "SwiftUI Patterns"
-  short_description: "Build native macOS SwiftUI scenes, menus, settings, and windows"
-  default_prompt: "Use $macos-swiftui-patterns to choose the right macOS SwiftUI scene structure, implement desktop-native layouts and commands, and avoid iOS-centric UI patterns."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Packaging & Notarization"
-  short_description: "Inspect packaging, signing, and notarization readiness"
-  default_prompt: "Use $macos-packaging-notarization to inspect a macOS app archive or bundle, explain distribution readiness, and summarize the next validation or repair step."

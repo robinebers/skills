@@ -111,4 +111,4 @@ The macOS, iOS, Expo, and Stripe skills are agent-agnostic guidance; they assume
 
 ## Credits
 
-The macOS, iOS, Expo, and Stripe skills are adapted from OpenAI's [`openai/plugins`](https://github.com/openai/plugins) collection (MIT) and reworked to be agent-agnostic — Codex-specific run-button wiring (`.codex/environments/environment.toml`) and presentation metadata were removed, while the per-skill `agents/openai.yaml` interface files are kept so the skills still install cleanly into Codex via the `skills` CLI.
+The macOS, iOS, Expo, and Stripe skills are adapted from OpenAI's [`openai/plugins`](https://github.com/openai/plugins) collection (MIT) and reworked to be agent-agnostic — Codex-specific run-button wiring (`.codex/environments/environment.toml`), presentation metadata, and per-skill `agents/openai.yaml` interface files were removed; the `skills` CLI uses the SKILL.md frontmatter instead. See [AGENTS.md](AGENTS.md) for how to add or update skills.
