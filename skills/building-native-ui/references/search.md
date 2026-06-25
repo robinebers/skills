@@ -58,33 +58,38 @@ headerSearchBarOptions: {
 Reusable hook for search state management:
 
 ```tsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 
 export function useSearch(options: any = {}) {
   const [search, setSearch] = useState("");
   const navigation = useNavigation();
 
+  // Keep the latest options in a ref so the effect doesn't re-run (and call
+  // setOptions) on every render — callers usually pass a fresh inline object.
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
       headerSearchBarOptions: {
-        ...options,
+        ...optionsRef.current,
         onChangeText(e: any) {
           setSearch(e.nativeEvent.text);
-          options.onChangeText?.(e);
+          optionsRef.current.onChangeText?.(e);
         },
         onSearchButtonPress(e: any) {
           setSearch(e.nativeEvent.text);
-          options.onSearchButtonPress?.(e);
+          optionsRef.current.onSearchButtonPress?.(e);
         },
         onCancelButtonPress(e: any) {
           setSearch("");
-          options.onCancelButtonPress?.(e);
+          optionsRef.current.onCancelButtonPress?.(e);
         },
       },
     });
-  }, [options, navigation]);
+  }, [navigation]);
 
   return search;
 }

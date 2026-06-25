@@ -216,7 +216,7 @@ export const FiberCanvas = ({
         unmountComponentAtNode(canvas!);
       }
     };
-  });
+  }, []); // configure the canvas once on mount; tear it down on unmount
 
   return <Canvas ref={canvasRef} style={style} />;
 };
