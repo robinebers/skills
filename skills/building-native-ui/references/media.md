@@ -67,6 +67,7 @@ function Camera({ onPicture }: { onPicture: (uri: string) => Promise<void> }) {
           <TouchableOpacity onPress={takePhoto} style={{ width: 64, height: 64, borderRadius: 99, backgroundColor: "white" }} />
         </GlassView>
         <View style={{ flexDirection: "row", justifyContent: "space-around", paddingHorizontal: 8 }}>
+          {/* GlassButton is the reusable glass icon button defined in visual-effects.md */}
           <GlassButton onPress={selectPhoto} icon="photo" />
           <GlassButton onPress={() => setType(t => t === "back" ? "front" : "back")} icon="arrow.triangle.2.circlepath" />
         </View>

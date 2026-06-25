@@ -210,13 +210,17 @@ export const FiberCanvas = ({
         };
       },
     });
-    root.current.render(children);
     return () => {
       if (canvas != null) {
         unmountComponentAtNode(canvas!);
       }
     };
-  }, []); // configure the canvas once on mount; tear it down on unmount
+  }, [scene, camera]); // (re)configure the root when the scene or camera changes
+
+  // Push child updates into the existing root whenever they change.
+  useEffect(() => {
+    root.current?.render(children);
+  }, [children]);
 
   return <Canvas ref={canvasRef} style={style} />;
 };
